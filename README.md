@@ -8,6 +8,8 @@ SpringEmbedder is a Java-based application that uses the Fruchterman-Reingold al
 
 The entry point of the application is the `Main` class, located in the `eu.virtualparadox.springembedder` package. This class initializes the graph, sets up the layout algorithm, and starts the layout process.
 
+![Sample](output.gif)
+
 ### Graph Initialization
 
 The graph is initialized using the `DemoGraphInitializer` class. This class creates a sample graph with a specified number of centers and nodes per center. It connects the nodes and assigns weights to the edges.
