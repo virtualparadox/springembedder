@@ -1,7 +1,7 @@
 package eu.virtualparadox.springembedder.renderercallback;
 
 import eu.virtualparadox.springembedder.Vector2D;
-import org.jgrapht.graph.DirectedWeightedPseudograph;
+import org.jgrapht.Graph;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public class NoOpRendererCallback<V,E> extends AbstractRendererCallback<V,E> {
     }
 
     @Override
-    public void render(DirectedWeightedPseudograph<V, E> graph, int iteration, Map<V, Vector2D> positionMap) {
+    public void render(Graph<V, E> graph, int iteration, Map<V, Vector2D> positionMap) {
         // do nothing
     }
 

@@ -2,7 +2,7 @@ package eu.virtualparadox.springembedder.renderercallback;
 
 import eu.virtualparadox.springembedder.Vector2D;
 import org.jcodec.api.awt.AWTSequenceEncoder;
-import org.jgrapht.graph.DirectedWeightedPseudograph;
+import org.jgrapht.Graph;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -18,14 +18,14 @@ public class VideoRendererCallback<V, E> extends PngRendererCallback<V, E> {
                                  final int height) {
         super(outputFolder, width, height);
         try {
-            encoder = AWTSequenceEncoder.create24Fps(outputFolder.resolve("output.mp4").toFile());
+            encoder = AWTSequenceEncoder.create25Fps(outputFolder.resolve("output.mp4").toFile());
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create encoder", e);
         }
     }
 
     @Override
-    public void render(final DirectedWeightedPseudograph<V, E> graph,
+    public void render(final Graph<V, E> graph,
                        final int iteration,
                        final Map<V, Vector2D> positions) {
 

@@ -3,7 +3,7 @@ package eu.virtualparadox.springembedder.renderercallback;
 import eu.virtualparadox.springembedder.EdgeWeightNormalizer;
 import eu.virtualparadox.springembedder.Vector2D;
 import org.apache.commons.lang3.StringUtils;
-import org.jgrapht.graph.DirectedWeightedPseudograph;
+import org.jgrapht.Graph;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,7 +21,7 @@ public class PngRendererCallback<V, E> extends AbstractRendererCallback<V, E> {
         super(outputFolder, width, height);
     }
 
-    public void render(final DirectedWeightedPseudograph<V, E> graph,
+    public void render(final Graph<V, E> graph,
                        final int iteration,
                        final Map<V, Vector2D> positions) {
 
@@ -34,9 +34,9 @@ public class PngRendererCallback<V, E> extends AbstractRendererCallback<V, E> {
         }
     }
 
-    protected BufferedImage renderToImage(final DirectedWeightedPseudograph<V, E> graph,
-                                        final int iteration,
-                                        final Map<V, Vector2D> positions) {
+    protected BufferedImage renderToImage(final Graph<V, E> graph,
+                                          final int iteration,
+                                          final Map<V, Vector2D> positions) {
         // Normalize edge weights once,
         // okay, it's disgusting... needs to be refactored
         if (iteration == 0) {

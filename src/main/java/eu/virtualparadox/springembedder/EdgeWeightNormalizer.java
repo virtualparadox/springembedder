@@ -1,6 +1,6 @@
 package eu.virtualparadox.springembedder;
 
-import org.jgrapht.graph.DirectedWeightedPseudograph;
+import org.jgrapht.Graph;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +23,18 @@ public class EdgeWeightNormalizer<V, E> {
      * @param graph the graph whose edge weights are to be normalized.
      * @return a map where the keys are the edges of the graph and the values are the normalized weights.
      */
-    public Map<E, Double> normalizeEdgeWeights(final DirectedWeightedPseudograph<V, E> graph) {
+    public Map<E, Double> normalizeEdgeWeights(final Graph<V, E> graph) {
         final Map<E, Double> normalizedWeights = new HashMap<>();
 
+        // if the graph is not weighted, assign a weight of 1.0 to all edges
+        if (!graph.getType().isWeighted()) {
+            for (E edge : graph.edgeSet()) {
+                normalizedWeights.put(edge, 1.0);
+            }
+            return normalizedWeights;
+        }
+
+        // otherwise, normalize the edge weights
         double minWeight = Double.MAX_VALUE;
         double maxWeight = Double.MIN_VALUE;
 

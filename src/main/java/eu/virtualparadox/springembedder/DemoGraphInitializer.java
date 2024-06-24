@@ -1,5 +1,6 @@
 package eu.virtualparadox.springembedder;
 
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.DirectedWeightedPseudograph;
 
@@ -11,8 +12,8 @@ public class DemoGraphInitializer {
         throw new UnsupportedOperationException("This class cannot be instantiated");
     }
 
-    public static DirectedWeightedPseudograph<String, DefaultWeightedEdge> initializeDemoGraph(int centers, int nodesPerCenter) {
-        final DirectedWeightedPseudograph<String, DefaultWeightedEdge> graph = new DirectedWeightedPseudograph<>(DefaultWeightedEdge.class);
+    public static Graph<String, DefaultWeightedEdge> initializeDemoGraph(int centers, int nodesPerCenter) {
+        final Graph<String, DefaultWeightedEdge> graph = new DirectedWeightedPseudograph<>(DefaultWeightedEdge.class);
 
         graph.addVertex(CENTER);
         for (int c = 0; c < centers; c++) {
@@ -32,12 +33,12 @@ public class DemoGraphInitializer {
         return graph;
     }
 
-    private static void addEdge(final DirectedWeightedPseudograph<String, DefaultWeightedEdge> graph,
+    private static void addEdge(final Graph<String, DefaultWeightedEdge> graph,
                                 final String source,
                                 final String target,
                                 final double weight) {
         DefaultWeightedEdge edge = graph.addEdge(source, target);
-        if (edge != null) {
+        if (edge != null && graph.getType().isWeighted()) {
             graph.setEdgeWeight(edge, weight);
         }
     }

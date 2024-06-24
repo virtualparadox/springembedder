@@ -2,7 +2,7 @@ package eu.virtualparadox.springembedder;
 
 import eu.virtualparadox.springembedder.renderercallback.NoOpRendererCallback;
 import eu.virtualparadox.springembedder.renderercallback.AbstractRendererCallback;
-import org.jgrapht.graph.DirectedWeightedPseudograph;
+import org.jgrapht.Graph;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +60,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param iterations Number of iterations to perform.
      * @return The final positions of the nodes.
      */
-    public Map<V, Vector2D> layout(final DirectedWeightedPseudograph<V, E> graph,
+    public Map<V, Vector2D> layout(final Graph<V, E> graph,
                                    final int iterations) {
         Map<V, Vector2D> positions = setInitialPositions(graph);
         double temperature = 50;
@@ -82,7 +82,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param graph The graph.
      * @return A map with the initial positions of the nodes.
      */
-    private Map<V, Vector2D> setInitialPositions(final DirectedWeightedPseudograph<V, E> graph) {
+    private Map<V, Vector2D> setInitialPositions(final Graph<V, E> graph) {
         final Map<V, Vector2D> result = new HashMap<>();
         for (V v : graph.vertexSet()) {
             final double x = random.nextInt(width);
@@ -102,7 +102,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param temperature       The current temperature.
      * @return Updated positions of the nodes.
      */
-    private Map<V, Vector2D> computeForcesAndUpdatePositions(final DirectedWeightedPseudograph<V, E> graph,
+    private Map<V, Vector2D> computeForcesAndUpdatePositions(final Graph<V, E> graph,
                                                              final Map<V, Vector2D> positions,
                                                              final Map<E, Double> normalizedWeights,
                                                              final double temperature) {
@@ -118,7 +118,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param normalizedWeights The normalized edge weights.
      * @return A map with the computed forces for each vertex.
      */
-    private Map<V, Vector2D> computeForces(final DirectedWeightedPseudograph<V, E> graph,
+    private Map<V, Vector2D> computeForces(final Graph<V, E> graph,
                                            final Map<V, Vector2D> positions,
                                            final Map<E, Double> normalizedWeights) {
         final Map<V, Vector2D> repulsiveDisplacements = calculateRepulsiveForces(graph, positions);
@@ -151,7 +151,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param positions The current positions of the nodes.
      * @return A map with the repulsive forces for each vertex.
      */
-    private Map<V, Vector2D> calculateRepulsiveForces(final DirectedWeightedPseudograph<V, E> graph,
+    private Map<V, Vector2D> calculateRepulsiveForces(final Graph<V, E> graph,
                                                       final Map<V, Vector2D> positions) {
         final Map<V, Vector2D> result = initDisplacementVector(graph);
         double optimalDistance = calcOptimalDistance(graph);
@@ -185,7 +185,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param normalizedWeights The normalized edge weights.
      * @return A map with the attractive forces for each vertex.
      */
-    private Map<V, Vector2D> calculateAttractiveForces(final DirectedWeightedPseudograph<V, E> graph,
+    private Map<V, Vector2D> calculateAttractiveForces(final Graph<V, E> graph,
                                                        final Map<V, Vector2D> positions,
                                                        final Map<E, Double> normalizedWeights) {
         final Map<V, Vector2D> result = initDisplacementVector(graph);
@@ -219,7 +219,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param graph The graph.
      * @return A map with zero displacement vectors for each vertex.
      */
-    private Map<V, Vector2D> initDisplacementVector(final DirectedWeightedPseudograph<V, E> graph) {
+    private Map<V, Vector2D> initDisplacementVector(final Graph<V, E> graph) {
         final Map<V, Vector2D> displacement = new HashMap<>();
         for (V v : graph.vertexSet()) {
             displacement.put(v, new Vector2D(0, 0));
@@ -233,7 +233,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param graph The graph.
      * @return The optimal distance.
      */
-    private double calcOptimalDistance(final DirectedWeightedPseudograph<V, E> graph) {
+    private double calcOptimalDistance(final Graph<V, E> graph) {
         return Math.sqrt((width * height) * 1.0d / graph.vertexSet().size()) / 2;
     }
 
@@ -246,7 +246,7 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param temperature   The current temperature.
      * @return Updated positions of the nodes.
      */
-    private Map<V, Vector2D> updatePositions(final DirectedWeightedPseudograph<V, E> graph,
+    private Map<V, Vector2D> updatePositions(final Graph<V, E> graph,
                                              final Map<V, Vector2D> positions,
                                              final Map<V, Vector2D> displacements,
                                              final double temperature) {
