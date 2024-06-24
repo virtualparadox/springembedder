@@ -22,17 +22,17 @@ The Fruchterman-Reingold algorithm is a force-directed layout algorithm for visu
 
 ### Repulsive Force
 
-The repulsive force \(F_r\) between two nodes \(u\) and \(v\) is calculated using the formula:
+The repulsive force $`F_r`$ between two nodes $`u`$ and $`v`$ is calculated using the formula:
 
-\[ F_r(d) = \frac{k^2}{d} \]
+$` F_r(d) = \frac{k^2}{d}`$
 
-where \(d\) is the distance between the nodes, and \(k\) is a constant related to the optimal distance between nodes. In the code, the calculation of repulsive forces is implemented in the `calculateRepulsiveForces` method of the `FruchtermanReingoldLayouter` class.
+where \(d\) is the distance between the nodes, and $`k`$ is a constant related to the optimal distance between nodes. In the code, the calculation of repulsive forces is implemented in the `calculateRepulsiveForces` method of the `FruchtermanReingoldLayouter` class.
 
 ### Attractive Force
 
-The attractive force \(F_a\) between two connected nodes \(u\) and \(v\) is given by:
+The attractive force $`F_a`$ between two connected nodes $`u`$ and $`v`$ is given by:
 
-\[ F_a(d) = \frac{d^2}{k} \]
+$` F_a(d) = \frac{d^2}{k} `$
 
 This is implemented in the `calculateAttractiveForces` method of the `FruchtermanReingoldLayouter` class.
 
