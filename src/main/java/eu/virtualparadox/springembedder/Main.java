@@ -1,6 +1,7 @@
 package eu.virtualparadox.springembedder;
 
 import eu.virtualparadox.springembedder.layouter.AbstractLayouter;
+import eu.virtualparadox.springembedder.layouter.FruchtermanReingoldLayouter;
 import eu.virtualparadox.springembedder.layouter.FruchtermanReingoldLayouterOpenCL;
 import eu.virtualparadox.springembedder.renderercallback.AbstractRendererCallback;
 import eu.virtualparadox.springembedder.renderercallback.VideoRendererCallback;
@@ -18,7 +19,7 @@ public class Main {
     public static void main(String[] args) {
         final Path tempFolder = resolveTempFolder();
 
-        final Graph<String, DefaultWeightedEdge> graph = DemoGraphInitializer.initializeDemoGraph(50, 100);
+        final Graph<String, DefaultWeightedEdge> graph = DemoGraphInitializer.initializeDemoGraph(5, 100);
 
         final AbstractRendererCallback<String, DefaultWeightedEdge> callback = new VideoRendererCallback<>(tempFolder, WIDTH, HEIGHT);
         final AbstractLayouter<String, DefaultWeightedEdge> layouter = new FruchtermanReingoldLayouterOpenCL<>(WIDTH, HEIGHT, callback);
