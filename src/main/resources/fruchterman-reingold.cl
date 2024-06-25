@@ -1,13 +1,3 @@
-// kernel.cl
-
-// Zero Array Kernel
-__kernel void zeroArray(__global float* array, int numElements) {
-    int i = get_global_id(0);
-    if (i < numElements) {
-        array[i] = 0.0f;
-    }
-}
-
 // Calculate Repulsive Forces Kernel
 __kernel void calculateRepulsiveForces(
     __global const float* positions,
@@ -18,6 +8,12 @@ __kernel void calculateRepulsiveForces(
 {
     int i = get_global_id(0);
     if (i >= numVertices) return;
+
+    // Zero-initialize the repulsive matrix for this vertex
+    for (int j = 0; j < numVertices; j++) {
+        repulsiveMatrix[2 * (i * numVertices + j)] = 0.0f;
+        repulsiveMatrix[2 * (i * numVertices + j) + 1] = 0.0f;
+    }
 
     float2 posV = (float2)(positions[2 * i], positions[2 * i + 1]);
 
@@ -49,6 +45,12 @@ __kernel void calculateAttractiveForces(
 {
     int i = get_global_id(0);
     if (i >= numEdges) return;
+
+    // Zero-initialize the attractive matrix for this edge
+    for (int v = 0; v < numVertices; v++) {
+        attractiveMatrix[2 * (i * numVertices + v)] = 0.0f;
+        attractiveMatrix[2 * (i * numVertices + v) + 1] = 0.0f;
+    }
 
     int2 edge = edges[i];
     int from = edge.x;
@@ -82,6 +84,7 @@ __kernel void summarizeForces(
     int v = get_global_id(0);
     if (v >= numVertices) return;
 
+    // Zero-initialize the displacements for this vertex
     float dx = 0.0f;
     float dy = 0.0f;
 
@@ -102,6 +105,7 @@ __kernel void summarizeForces(
     displacements[2 * v] = dx;
     displacements[2 * v + 1] = dy;
 }
+
 
 // Update Positions Kernel
 __kernel void updatePositions(

@@ -24,7 +24,6 @@ public class FruchtermanReingoldLayouterOpenCL<V, E> extends AbstractLayouter<V,
     private cl_kernel kernelAttractive;
     private cl_kernel kernelSummarize;
     private cl_kernel kernelUpdate;
-    private cl_kernel kernelZeroArray;
 
     public FruchtermanReingoldLayouterOpenCL(final int width, final int height, final AbstractRendererCallback<V, E> callback) {
         super(width, height, callback);
@@ -60,7 +59,6 @@ public class FruchtermanReingoldLayouterOpenCL<V, E> extends AbstractLayouter<V,
             kernelAttractive = clCreateKernel(program, "calculateAttractiveForces", null);
             kernelSummarize = clCreateKernel(program, "summarizeForces", null);
             kernelUpdate = clCreateKernel(program, "updatePositions", null);
-            kernelZeroArray = clCreateKernel(program, "zeroArray", null);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load OpenCL kernel", e);
         }
@@ -111,15 +109,6 @@ public class FruchtermanReingoldLayouterOpenCL<V, E> extends AbstractLayouter<V,
         final TimeWatch tw = TimeWatch.start();
         for (int i = 0; i < iterations; i++) {
             tw.reset();
-
-            // Zero out repulsive and attractive matrices
-            clSetKernelArg(kernelZeroArray, 0, Sizeof.cl_mem, Pointer.to(repulsiveMatrixMem));
-            clSetKernelArg(kernelZeroArray, 1, Sizeof.cl_int, Pointer.to(new int[]{2 * numVertices * numVertices}));
-            clEnqueueNDRangeKernel(commandQueue, kernelZeroArray, 1, null, new long[]{2 * numVertices * numVertices}, null, 0, null, null);
-
-            clSetKernelArg(kernelZeroArray, 0, Sizeof.cl_mem, Pointer.to(attractiveMatrixMem));
-            clSetKernelArg(kernelZeroArray, 1, Sizeof.cl_int, Pointer.to(new int[]{2 * numEdges * numVertices}));
-            clEnqueueNDRangeKernel(commandQueue, kernelZeroArray, 1, null, new long[]{2 * numEdges * numVertices}, null, 0, null, null);
 
             // Calculate repulsive forces
             clSetKernelArg(kernelRepulsive, 0, Sizeof.cl_mem, Pointer.to(positionsMem));
@@ -194,7 +183,6 @@ public class FruchtermanReingoldLayouterOpenCL<V, E> extends AbstractLayouter<V,
         clReleaseKernel(kernelAttractive);
         clReleaseKernel(kernelUpdate);
         clReleaseKernel(kernelSummarize);
-        clReleaseKernel(kernelZeroArray);
         clReleaseProgram(program);
         clReleaseCommandQueue(commandQueue);
         clReleaseContext(context);
