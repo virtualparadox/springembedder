@@ -1,5 +1,6 @@
 package eu.virtualparadox.springembedder.layouter;
 
+import eu.virtualparadox.springembedder.EdgeWeightNormalizer;
 import eu.virtualparadox.springembedder.ResourceLoader;
 import eu.virtualparadox.springembedder.TimeWatch;
 import eu.virtualparadox.springembedder.Vector2D;
@@ -87,12 +88,13 @@ public class FruchtermanReingoldLayouterOpenCL<V, E> extends AbstractLayouter<V,
         }
 
         idx = 0;
+        final Map<E, Double> normalizedWeights = edgeWeightNormalizer.normalizeEdgeWeights(graph);
         for (E e : graph.edgeSet()) {
             V from = graph.getEdgeSource(e);
             V to = graph.getEdgeTarget(e);
             edges[2 * idx] = vertexIndexMap.get(from);
             edges[2 * idx + 1] = vertexIndexMap.get(to);
-            weights[idx] = 1.0f; // Assuming weight is 1 for simplicity
+            weights[idx] = normalizedWeights.get(e).floatValue();
             idx++;
         }
 
@@ -137,10 +139,6 @@ public class FruchtermanReingoldLayouterOpenCL<V, E> extends AbstractLayouter<V,
             clSetKernelArg(kernelAttractive, 6, Sizeof.cl_float, Pointer.to(new float[]{(float) optimalDistance}));
             clSetKernelArg(kernelAttractive, 7, Sizeof.cl_float, Pointer.to(new float[]{C}));
             clEnqueueNDRangeKernel(commandQueue, kernelAttractive, 1, null, new long[]{numEdges}, null, 0, null, null);
-
-            // Read back the matrices
-            clEnqueueReadBuffer(commandQueue, repulsiveMatrixMem, CL_TRUE, 0, Sizeof.cl_float * 2 * numVertices * numVertices, Pointer.to(repulsiveMatrix), 0, null, null);
-            clEnqueueReadBuffer(commandQueue, attractiveMatrixMem, CL_TRUE, 0, Sizeof.cl_float * 2 * numEdges * numVertices, Pointer.to(attractiveMatrix), 0, null, null);
 
             // Summarize forces
             clSetKernelArg(kernelSummarize, 0, Sizeof.cl_mem, Pointer.to(repulsiveMatrixMem));
