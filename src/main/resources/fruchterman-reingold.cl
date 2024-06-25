@@ -61,7 +61,7 @@ __kernel void calculateAttractiveForces(
     float distance = length(delta);
 
     if (distance > 0) {
-        float forceMagnitude = C * (distance * distance) / (optimalDistance * weight);
+        float forceMagnitude = C * weight * (distance * distance) / optimalDistance;
         float2 attractiveForce = normalize(delta) * forceMagnitude;
 
         attractiveMatrix[2 * (i * numVertices + from)] = -attractiveForce.x;
