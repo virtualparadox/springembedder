@@ -196,7 +196,7 @@ public class FruchtermanReingoldLayouter<V, E> extends AbstractLayouter<V, E> {
 
             if (distance > 0) {
                 double normalizedWeight = normalizedWeights.get(edge);
-                double attraction = C * (distance * distance) / optimalDistance * normalizedWeight;
+                double attraction = C * (distance * distance) / (optimalDistance * normalizedWeight);
                 Vector2D force = delta.normalize().scale(attraction);
                 result.put(fromVertex, result.get(fromVertex).subtract(force));
                 result.put(toVertex, result.get(toVertex).add(force));
