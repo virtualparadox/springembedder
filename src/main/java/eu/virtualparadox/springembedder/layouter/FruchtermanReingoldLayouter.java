@@ -1,13 +1,13 @@
-package eu.virtualparadox.springembedder;
+package eu.virtualparadox.springembedder.layouter;
 
+import eu.virtualparadox.springembedder.TimeWatch;
+import eu.virtualparadox.springembedder.Vector2D;
 import eu.virtualparadox.springembedder.renderercallback.NoOpRendererCallback;
 import eu.virtualparadox.springembedder.renderercallback.AbstractRendererCallback;
 import org.jgrapht.Graph;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
 
 /**
  * Class for performing layout calculations using the Spring Embedder algorithm.
@@ -15,15 +15,9 @@ import java.util.Random;
  * @param <V> Type of the vertices in the graph.
  * @param <E> Type of the edges in the graph.
  */
-public class FruchtermanReingoldLayouter<V, E> {
+public class FruchtermanReingoldLayouter<V, E> extends AbstractLayouter<V, E> {
 
     private static final double C = 0.01;
-    private final int width;
-    private final int height;
-    private final AbstractRendererCallback<V, E> callback;
-    private final EdgeWeightNormalizer<V, E> edgeWeightNormalizer;
-    private final Random random;
-
 
     /**
      * Constructor for the SpringEmbedderLayouter.
@@ -35,11 +29,7 @@ public class FruchtermanReingoldLayouter<V, E> {
     public FruchtermanReingoldLayouter(final int width,
                                        final int height,
                                        final AbstractRendererCallback<V, E> callback) {
-        this.width = width;
-        this.height = height;
-        this.callback = Objects.requireNonNull(callback);
-        this.edgeWeightNormalizer = new EdgeWeightNormalizer<>();
-        this.random = new Random();
+        super(width, height, callback);
     }
 
     /**
@@ -60,14 +50,18 @@ public class FruchtermanReingoldLayouter<V, E> {
      * @param iterations Number of iterations to perform.
      * @return The final positions of the nodes.
      */
+    @Override
     public Map<V, Vector2D> layout(final Graph<V, E> graph,
                                    final int iterations) {
         Map<V, Vector2D> positions = setInitialPositions(graph);
         double temperature = 50;
         final Map<E, Double> normalizedWeights = edgeWeightNormalizer.normalizeEdgeWeights(graph);
 
+        final TimeWatch tw = TimeWatch.start();
         for (int i = 0; i < iterations; i++) {
+            tw.reset();
             positions = computeForcesAndUpdatePositions(graph, positions, normalizedWeights, temperature);
+            logger.debug("Iteration {} took {}", i, tw.toMilliSeconds());
             callback.render(graph, i, positions);
             temperature = Math.max(1.5, temperature * 0.95);
         }
@@ -168,7 +162,6 @@ public class FruchtermanReingoldLayouter<V, E> {
                         double repulsion = C * (optimalDistance * optimalDistance) / distance;
                         Vector2D force = delta.normalize().scale(repulsion);
                         result.put(v, result.get(v).add(force));
-                        result.put(u, result.get(u).subtract(force));
                     }
                 }
             }

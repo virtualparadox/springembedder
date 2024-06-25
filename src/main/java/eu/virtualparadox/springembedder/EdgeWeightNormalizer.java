@@ -49,6 +49,15 @@ public class EdgeWeightNormalizer<V, E> {
             }
         }
 
+        // If all edge weights are the same, assign the midpoint of the normalized range to all edges.
+        if (minWeight == maxWeight) {
+            double midNormalizedWeight = (MIN_NORMALIZED_WEIGHT + MAX_NORMALIZED_WEIGHT) / 2.0;
+            for (E edge : graph.edgeSet()) {
+                normalizedWeights.put(edge, midNormalizedWeight);
+            }
+            return normalizedWeights;
+        }
+
         // Normalize the edge weights to the range [1, 10].
         for (E edge : graph.edgeSet()) {
             double rawWeight = graph.getEdgeWeight(edge);
