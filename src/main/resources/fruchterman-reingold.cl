@@ -1,19 +1,16 @@
+// Constants
+#define HACK_FACTOR 100000.0f // Hack to convert float to int because OpenCL 1.2 doesn't support float atomics
+
 // Calculate Repulsive Forces Kernel
 __kernel void calculateRepulsiveForces(
     __global const float* positions,
-    __global float* repulsiveMatrix,
+    __global int* repulsiveForces,
     int numVertices,
     float optimalDistance,
     float C)
 {
     int i = get_global_id(0);
     if (i >= numVertices) return;
-
-    // Zero-initialize the repulsive matrix for this vertex
-    for (int j = 0; j < numVertices; j++) {
-        repulsiveMatrix[2 * (i * numVertices + j)] = 0.0f;
-        repulsiveMatrix[2 * (i * numVertices + j) + 1] = 0.0f;
-    }
 
     float2 posV = (float2)(positions[2 * i], positions[2 * i + 1]);
 
@@ -25,8 +22,12 @@ __kernel void calculateRepulsiveForces(
             if (distance > 0) {
                 float force = C * (optimalDistance * optimalDistance) / distance;
                 float2 repulsiveForce = normalize(delta) * force;
-                repulsiveMatrix[2 * (i * numVertices + j)] = repulsiveForce.x;
-                repulsiveMatrix[2 * (i * numVertices + j) + 1] = repulsiveForce.y;
+
+                int intRepulsiveForceX = (int)(repulsiveForce.x * HACK_FACTOR);
+                int intRepulsiveForceY = (int)(repulsiveForce.y * HACK_FACTOR);
+
+                atomic_add(&repulsiveForces[2 * i], intRepulsiveForceX);
+                atomic_add(&repulsiveForces[2 * i + 1], intRepulsiveForceY);
             }
         }
     }
@@ -35,7 +36,7 @@ __kernel void calculateRepulsiveForces(
 // Calculate Attractive Forces Kernel
 __kernel void calculateAttractiveForces(
     __global const float* positions,
-    __global float* attractiveMatrix,
+    __global int* attractiveForces,
     __global const int2* edges,
     __global const float* weights,
     int numEdges,
@@ -45,12 +46,6 @@ __kernel void calculateAttractiveForces(
 {
     int i = get_global_id(0);
     if (i >= numEdges) return;
-
-    // Zero-initialize the attractive matrix for this edge
-    for (int v = 0; v < numVertices; v++) {
-        attractiveMatrix[2 * (i * numVertices + v)] = 0.0f;
-        attractiveMatrix[2 * (i * numVertices + v) + 1] = 0.0f;
-    }
 
     int2 edge = edges[i];
     int from = edge.x;
@@ -66,46 +61,37 @@ __kernel void calculateAttractiveForces(
         float forceMagnitude = C * weight * (distance * distance) / optimalDistance;
         float2 attractiveForce = normalize(delta) * forceMagnitude;
 
-        attractiveMatrix[2 * (i * numVertices + from)] = -attractiveForce.x;
-        attractiveMatrix[2 * (i * numVertices + from) + 1] = -attractiveForce.y;
-        attractiveMatrix[2 * (i * numVertices + to)] = attractiveForce.x;
-        attractiveMatrix[2 * (i * numVertices + to) + 1] = attractiveForce.y;
+        int intAttractiveForceX = (int)(attractiveForce.x * HACK_FACTOR);
+        int intAttractiveForceY = (int)(attractiveForce.y * HACK_FACTOR);
+
+        atomic_add(&attractiveForces[2 * from], -intAttractiveForceX);
+        atomic_add(&attractiveForces[2 * from + 1], -intAttractiveForceY);
+        atomic_add(&attractiveForces[2 * to], intAttractiveForceX);
+        atomic_add(&attractiveForces[2 * to + 1], intAttractiveForceY);
     }
 }
 
 // Summarize Forces Kernel
 __kernel void summarizeForces(
-    __global const float* repulsiveMatrix,
-    __global const float* attractiveMatrix,
+    __global const int* repulsiveForces,
+    __global const int* attractiveForces,
     __global float* displacements,
-    int numVertices,
-    int numEdges)
+    int numVertices)
 {
     int v = get_global_id(0);
     if (v >= numVertices) return;
 
-    // Zero-initialize the displacements for this vertex
-    float dx = 0.0f;
-    float dy = 0.0f;
+    int repulsiveX = repulsiveForces[2 * v];
+    int repulsiveY = repulsiveForces[2 * v + 1];
+    int attractiveX = attractiveForces[2 * v];
+    int attractiveY = attractiveForces[2 * v + 1];
 
-    // Summarize repulsive forces
-    for (int j = 0; j < numVertices; j++) {
-        if (v != j) {
-            dx += repulsiveMatrix[2 * (v * numVertices + j)];
-            dy += repulsiveMatrix[2 * (v * numVertices + j) + 1];
-        }
-    }
-
-    // Summarize attractive forces
-    for (int e = 0; e < numEdges; e++) {
-        dx += attractiveMatrix[2 * (e * numVertices + v)];
-        dy += attractiveMatrix[2 * (e * numVertices + v) + 1];
-    }
+    float dx = (repulsiveX + attractiveX) / HACK_FACTOR;
+    float dy = (repulsiveY + attractiveY) / HACK_FACTOR;
 
     displacements[2 * v] = dx;
     displacements[2 * v + 1] = dy;
 }
-
 
 // Update Positions Kernel
 __kernel void updatePositions(
